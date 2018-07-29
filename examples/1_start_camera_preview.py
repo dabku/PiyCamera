@@ -1,0 +1,21 @@
+import cv2
+from PiyCamera.PiyCamera import OSDetector
+if OSDetector.is_embedded():
+    from PiyCamera.PiyCamera import PiCamera as PiyCamera
+else:
+    from PiyCamera.PiyCamera import PyCamera as PiyCamera
+
+
+if __name__ == '__main__':
+
+    cam = PiyCamera()
+    cam.start_camera_thread()
+    cam.set_resolution(1920, 1080)
+
+    while True:
+        image = cam.read_frame()
+        if image is not None:
+            cv2.imshow('img', image)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
