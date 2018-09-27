@@ -2,6 +2,7 @@ from threading import Thread
 import logging
 logger = logging.getLogger(__name__)
 
+
 class OSDetector:
     @staticmethod
     def is_windows():
@@ -19,6 +20,7 @@ class OSDetector:
         except AttributeError:
             pass
         return False
+
 
 class PiyCamera:
     def __init__(self):
@@ -49,7 +51,7 @@ class PiyCamera:
     def camera_worker(self):
         raise NotImplementedError
 
-    def save_image(self):
+    def save_image(self, img_path):
         raise NotImplementedError
 
     def set_resolution(self, width, height):
@@ -88,12 +90,6 @@ class PiyCamera:
     def get_exposure(self):
         raise NotImplementedError
 
-#    def set_shutter_speed(self, speed):
-#        raise NotImplementedError
-
-#    def get_shutter_speed(self):
- #       raise NotImplementedError
-
     def get_settings(self):
         return {'iso': self.get_iso(),
                 'resolution': self.get_resolution(),
@@ -101,7 +97,8 @@ class PiyCamera:
                 'brightness': self.get_brightness(),
                 'exposure': self.get_exposure(),
                 'contrast': self.get_contrast()
-        }
+                }
+
 
 def change_settings(func):
     def func_wrapper(self, *args):
@@ -133,7 +130,7 @@ class PyCamera(PiyCamera):
             response = call(['lsmod | grep bcm...._v4l2'], shell=True)
             if len(response) <= 1:
                 logger.warning('It seems you are trying to use OpenCV camera on RaspberryPi. '
-                           'Make sure that v4l2 module is loaded as it was not detected')
+                               'Make sure that v4l2 module is loaded as it was not detected')
 
     def get_frame(self):
         return self._frame
@@ -146,7 +143,7 @@ class PyCamera(PiyCamera):
         return self.get_frame()
 
     def update_frame(self):
-        got_frame = False
+        got_frame, frame = self._video_capture.read()
         while not got_frame:
             got_frame, frame = self._video_capture.read()
         self._frame = frame
@@ -170,7 +167,7 @@ class PyCamera(PiyCamera):
 
     @change_settings
     def set_brightness(self, brightness):
-        self._video_capture.set(10,brightness)
+        self._video_capture.set(10, brightness)
 
     def get_brightness(self):
         return self._video_capture.get(10)
@@ -184,14 +181,14 @@ class PyCamera(PiyCamera):
 
     @change_settings
     def set_exposure(self, exposure):
-        self._video_capture.set(15,exposure)
+        self._video_capture.set(15, exposure)
 
     def get_exposure(self):
         return self._video_capture.get(15)
 
     @change_settings
     def set_fps(self, fps):
-        self._video_capture.set(5,fps)
+        self._video_capture.set(5, fps)
 
     def get_fps(self):
         return self._video_capture.get(5)
@@ -237,8 +234,15 @@ class PiCamera(PiyCamera):
             self._raw_capture.truncate(0)
             if not self._run:
                 self.stream.close()
-                
         logger.debug('Camera worker ended...')
+
+    def save_image(self, img_path):
+        try:
+            with open(img_path, 'wb') as f:
+                self._video_capture.capture(f)
+            return 1
+        except IOError:
+            return -1
 
     @change_settings
     def set_resolution(self, width=1024, height=768):
@@ -250,7 +254,7 @@ class PiCamera(PiyCamera):
         raise NotImplementedError
 
     def set_brightness(self, brightness=50):
-        if brightness<0:
+        if brightness < 0:
             brightness = 0
         elif brightness > 100:
             brightness = 100
@@ -274,10 +278,10 @@ class PiCamera(PiyCamera):
             exposure = -25
         elif exposure > 25:
             exposure = 25
-        self._video_capture.exposure_compenstation = exposure
+        self._video_capture.exposure_compensation = exposure
 
     def get_exposure(self):
-        return self._video_capture.exposure_compenstation
+        return self._video_capture.exposure_compensation
 
     def set_fps(self, fps):
         raise NotImplementedError
@@ -293,6 +297,4 @@ class PiCamera(PiyCamera):
         self._video_capture.iso = iso
 
     def get_iso(self):
-        return self._video_capture.iso = iso
-
-
+        return self._video_capture.iso
