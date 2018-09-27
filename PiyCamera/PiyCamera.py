@@ -88,11 +88,11 @@ class PiyCamera:
     def get_exposure(self):
         raise NotImplementedError
 
-    def set_shutter_speed(self, speed):
-        raise NotImplementedError
+#    def set_shutter_speed(self, speed):
+#        raise NotImplementedError
 
-    def get_shutter_speed(self):
-        raise NotImplementedError
+#    def get_shutter_speed(self):
+ #       raise NotImplementedError
 
     def get_settings(self):
         return {'iso': self.get_iso(),
@@ -204,14 +204,6 @@ class PyCamera(PiyCamera):
         logger.warning('Opencv does not support ISO setting')
         return -1
 
-    @change_settings
-    def set_shutter_speed(self, speed):
-        logger.warning('Opencv does not support shutter speeds')
-
-    def get_shutter_speed(self):
-        logger.warning('Opencv does not support shutter speeds')
-        return -1
-
 
 class PiCamera(PiyCamera):
     def __init__(self):
@@ -221,6 +213,8 @@ class PiCamera(PiyCamera):
         self._video_capture = PiCam()
         self._raw_capture = PiRGBArray(self._video_capture)
 
+        self.stream = None
+        
     def get_frame(self):
         return self._frame
 
@@ -235,16 +229,70 @@ class PiCamera(PiyCamera):
         self._frame = self._raw_capture.array
 
     def camera_worker(self):
+        self.stream = self._video_capture .capture_continuous(self._raw_capture,
+                                                              format="bgr", use_video_port=True)
         logger.debug('Camera worker started...')
-        while self._run:
-            self.update_frame()
+        for f in self.stream:
+            self._frame = f.array
+            self._raw_capture.truncate(0)
+            if not self._run:
+                self.stream.close()
+                
         logger.debug('Camera worker ended...')
 
     @change_settings
     def set_resolution(self, width=1024, height=768):
+        from picamera.array import PiRGBArray
         self._video_capture.resolution = (width, height)
         self._raw_capture = PiRGBArray(self._video_capture)
-
+       
     def get_resolution(self):
         raise NotImplementedError
+
+    def set_brightness(self, brightness=50):
+        if brightness<0:
+            brightness = 0
+        elif brightness > 100:
+            brightness = 100
+        self._video_capture.brightness = brightness
+
+    def get_brightness(self):
+        return self._video_capture.brightness
+
+    def set_contrast(self, contrast=0):
+        if contrast < -100:
+            contrast = -100
+        elif contrast > 100:
+            contrast = 100
+        self._video_capture.contrast = contrast
+
+    def get_contrast(self):
+        return self._video_capture.contrast
+
+    def set_exposure(self, exposure=0):
+        if exposure < -25:
+            exposure = -25
+        elif exposure > 25:
+            exposure = 25
+        self._video_capture.exposure_compenstation = exposure
+
+    def get_exposure(self):
+        return self._video_capture.exposure_compenstation
+
+    def set_fps(self, fps):
+        raise NotImplementedError
+
+    def get_fps(self):
+        return self._video_capture.framerate
+
+    def set_iso(self, iso=0):
+        if iso < 0:
+            iso = 0
+        elif iso > 800:
+            iso = 800
+        self._video_capture.iso = iso
+
+    def get_iso(self):
+        return self._video_capture.iso = iso
+
 
