@@ -1,4 +1,6 @@
 import cv2
+import sys
+sys.path.append('../')
 from PiyCamera.PiyCamera import OSDetector
 if OSDetector.is_embedded():
     from PiyCamera.PiyCamera import PiCamera as PiyCamera

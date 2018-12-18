@@ -9,15 +9,12 @@ else:
 
 
 if __name__ == '__main__':
+    print(OSDetector.is_embedded())
+    cam = PiyCamera()   
+    cam.get_exposure()
+    cam.get_iso()
+    cam.get_contrast()
+    cam.get_resolution()
+    cam.get_brightness()
 
-    cam = PiyCamera()
-    cam.start_camera_thread()
-    cam.set_resolution(1920, 1080)
-
-    while True:
-        image = cam.read_frame()
-        if image is not None:
-            cv2.imshow('img', image)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
 
