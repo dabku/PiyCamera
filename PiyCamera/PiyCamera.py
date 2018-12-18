@@ -251,7 +251,7 @@ class PiCamera(PiyCamera):
         self._raw_capture = PiRGBArray(self._video_capture)
        
     def get_resolution(self):
-        raise NotImplementedError
+        return self._video_capture.resolution 
 
     def set_brightness(self, brightness=50):
         if brightness < 0:

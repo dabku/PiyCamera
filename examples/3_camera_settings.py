@@ -11,10 +11,10 @@ else:
 if __name__ == '__main__':
     print(OSDetector.is_embedded())
     cam = PiyCamera()   
-    cam.get_exposure()
-    cam.get_iso()
-    cam.get_contrast()
-    cam.get_resolution()
-    cam.get_brightness()
+    print('Exposure: {}'.format(cam.get_exposure()))
+    print('ISO: {}'.format(cam.get_iso()))
+    print('Contrast: {}'.format(cam.get_contrast()))
+    print('Resolution: {}'.format(cam.get_resolution()))
+    print('Brightness: {}'.format(cam.get_brightness()))
 
 
