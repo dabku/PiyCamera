@@ -118,7 +118,6 @@ class PyCamera(PiyCamera):
     def __init__(self, device_no=0):
         global imwrite
         from cv2 import VideoCapture, imwrite
-        import cv2
         super(PyCamera, self).__init__()
         self._video_capture = VideoCapture(device_no)
         self._validate_module()
