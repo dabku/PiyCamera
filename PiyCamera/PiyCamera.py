@@ -118,6 +118,7 @@ class PyCamera(PiyCamera):
     def __init__(self, device_no=0):
         global imwrite
         from cv2 import VideoCapture, imwrite
+        from time import sleep
         super(PyCamera, self).__init__()
         self._video_capture = VideoCapture(device_no)
         self._validate_module()
@@ -148,6 +149,7 @@ class PyCamera(PiyCamera):
         self._frame = frame
 
     def camera_worker(self):
+        sleep(0.01)
         while self._run:
             logger.info('frame')
             self._video_capture.grab()
